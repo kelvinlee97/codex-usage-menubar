@@ -4,9 +4,11 @@ set -euo pipefail
 MODE="${1:-run}"
 APP_NAME="CodexBalance"
 APP_DISPLAY_NAME="Codex Usage"
-APP_BUNDLE_NAME="Codex Balance"
+APP_BUNDLE_NAME="Codex Usage"
 BUNDLE_ID="com.kelvin.codexbalance"
 MIN_SYSTEM_VERSION="14.0"
+APP_VERSION="${CODEX_BALANCE_VERSION:-1.0.0}"
+APP_BUILD="${CODEX_BALANCE_BUILD:-1}"
 BUILD_CONFIGURATION="${CODEX_BALANCE_CONFIGURATION:-debug}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -25,8 +27,22 @@ INFO_PLIST="$APP_CONTENTS/Info.plist"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
-swift build "${SWIFT_BUILD_ARGS[@]}"
-BUILD_BINARY="$(swift build "${SWIFT_BUILD_ARGS[@]}" --show-bin-path)/$APP_NAME"
+# Ship a universal binary for release so downloads run on Intel Macs too.
+# SwiftPM's own multi-arch build needs full Xcode, so build each slice with the
+# Command Line Tools and join them with lipo.
+if [[ "${CODEX_BALANCE_UNIVERSAL:-0}" == "1" ]]; then
+  SLICES=()
+  for arch in arm64 x86_64; do
+    swift build "${SWIFT_BUILD_ARGS[@]}" --arch "$arch"
+    SLICES+=("$(swift build "${SWIFT_BUILD_ARGS[@]}" --arch "$arch" --show-bin-path)/$APP_NAME")
+  done
+  BUILD_BINARY="$ROOT_DIR/.build/universal-$BUILD_CONFIGURATION/$APP_NAME"
+  mkdir -p "$(dirname "$BUILD_BINARY")"
+  lipo -create "${SLICES[@]}" -output "$BUILD_BINARY"
+else
+  swift build "${SWIFT_BUILD_ARGS[@]}"
+  BUILD_BINARY="$(swift build "${SWIFT_BUILD_ARGS[@]}" --show-bin-path)/$APP_NAME"
+fi
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS" "$APP_RESOURCES"
@@ -52,9 +68,9 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>1.0.0</string>
+  <string>$APP_VERSION</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>$APP_BUILD</string>
   <key>LSMinimumSystemVersion</key>
   <string>$MIN_SYSTEM_VERSION</string>
   <key>LSApplicationCategoryType</key>
@@ -71,6 +87,11 @@ PLIST
 
 codesign --force --options runtime --sign - "$APP_BUNDLE"
 mkdir -p "$INSTALL_DIR"
+# Remove the pre-1.0 bundle name so a rename does not leave two copies behind.
+LEGACY_BUNDLE="$INSTALL_DIR/Codex Balance.app"
+if [[ "$LEGACY_BUNDLE" != "$INSTALLED_BUNDLE" && -d "$LEGACY_BUNDLE" ]]; then
+  rm -rf "$LEGACY_BUNDLE"
+fi
 rm -rf "$INSTALLED_BUNDLE"
 cp -R "$APP_BUNDLE" "$INSTALLED_BUNDLE"
 

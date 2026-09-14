@@ -9,7 +9,7 @@
 A tiny macOS menu-bar app that shows your remaining 5-hour and 7-day [Codex CLI](https://github.com/openai/codex) usage, reset times, and credit balance — no window, no Dock icon, no fuss.
 
 [![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-black?logo=apple)](#requirements)
-[![Apple Silicon](https://img.shields.io/badge/chip-Apple%20Silicon-blue)](#requirements)
+[![Universal](https://img.shields.io/badge/chip-Apple%20Silicon%20%2B%20Intel-blue)](#requirements)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 <sub>🍎 macOS only — this is a native menu-bar app and does not run on Windows or Linux.</sub>
@@ -33,11 +33,19 @@ No Dock icon, no window to manage — it lives in the menu bar and polls the loc
 
 ## Requirements
 
-- **macOS 14 (Sonoma) or later, Apple Silicon (arm64)** — this is a native Mac menu-bar app; it does not support Windows, Linux, or Intel Macs.
-- [Swift](https://www.swift.org/install/) toolchain (Xcode or Command Line Tools)
+- **macOS 14 (Sonoma) or later** — Apple Silicon and Intel are both supported; the release build is a universal binary.
 - [Codex CLI](https://github.com/openai/codex) installed and authenticated (`codex login`)
+- [Swift](https://www.swift.org/install/) toolchain (Xcode or Command Line Tools) — only if you build from source
 
-## Install
+## Download
+
+1. Grab `CodexUsage.zip` from the [latest release](https://github.com/kelvinlee97/codex-usage-menubar/releases/latest).
+2. Unzip it and drag **Codex Usage.app** into `/Applications`.
+3. Launch it. The app is signed with a Developer ID certificate and notarized by Apple, so it opens normally — no Gatekeeper warning and no right-click-to-open workaround.
+
+You'll see the usage percentage appear in your menu bar. If it shows an error instead, confirm `codex login` works in your terminal first.
+
+## Install from source
 
 Clone and run the build script, which compiles the app, stages it into a `.app` bundle, installs it to `/Applications`, and launches it:
 
@@ -47,7 +55,7 @@ cd codex-usage-menubar
 ./script/build_and_run.sh
 ```
 
-The installed bundle remains `/Applications/Codex Balance.app` for upgrade and Launch-at-Login compatibility, while Finder and the menu bar show the product name **Codex Usage**.
+This installs `/Applications/Codex Usage.app`.
 
 The app appears in your menu bar showing your remaining usage percentage. Click it to open the popover with full details, a link to the Codex usage page, and a Launch at Login toggle.
 
@@ -62,6 +70,8 @@ This compiles the executable without bundling it into a `.app` — useful for qu
 ```bash
 CODEX_BALANCE_CONFIGURATION=release ./script/build_and_run.sh
 ```
+
+Dev builds are single-architecture for speed. Set `CODEX_BALANCE_UNIVERSAL=1` to produce a universal (arm64 + x86_64) binary; `qa.sh` and `package_release.sh` do this for you. Version strings come from `CODEX_BALANCE_VERSION` / `CODEX_BALANCE_BUILD` (default `1.0.0` / `1`).
 
 ## Other build script modes
 
@@ -102,11 +112,12 @@ Codex Usage locates the Codex CLI on your machine, launches `codex app-server --
 
 ## Known limitations
 
-See [handoff.md](handoff.md) for the full list, including:
-
-- macOS + Apple Silicon (`arm64`) only — no Windows/Linux/Intel support.
+- macOS only — no Windows or Linux support.
 - The menu-bar glyph uses a built-in monochrome SF Symbol.
 - Not sandboxed; App Store distribution is unproven for this architecture.
+- Builds from source are ad-hoc signed; only the published release is Developer ID signed and notarized.
+- No automatic updater, DMG installer, or crash reporting.
+- Usage retrieval depends on the local Codex CLI's app-server protocol, which is not a stable public API.
 
 ## License
 

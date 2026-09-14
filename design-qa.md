@@ -1,17 +1,18 @@
 # Design QA
 
 - Source visual truth: `Assets/AppIcon.png`
-- Implementation: `/Applications/Codex Balance.app`, inspected in Finder list view and Quick Look through Computer Use
+- Implementation: `/Applications/Codex Usage.app`, inspected in Finder list view and Quick Look through Computer Use
+- Note: this record was captured before the product was renamed to Codex Usage; the icon findings still apply, and the bundle has since been renamed so Finder shows `Codex Usage`.
 - Viewport/state: macOS Applications folder and Quick Look, light appearance, Retina display
 - Source dimensions: 1254 × 1254 px; packaged icon: multi-resolution ICNS up to 1024 × 1024 px; Finder rendering uses the system-selected Retina representation
 
 ## Evidence
 
-Finder displayed the new icon beside `Codex Balance`, and Quick Look rendered the large icon with clean rounded edges, transparent corners, readable knot geometry, and the blue balance indicator. A focused comparison was used because the requested visual change was limited to application identity; the menu-bar UI and copy were unchanged.
+Finder displayed the new icon beside the app name, and Quick Look rendered the large icon with clean rounded edges, transparent corners, readable knot geometry, and the blue balance indicator. A focused comparison was used because the requested visual change was limited to application identity; the menu-bar UI and copy were unchanged.
 
 ## Required fidelity surfaces
 
-- Typography and copy: Finder shows `Codex Balance`; bundle display name matches.
+- Typography and copy: Finder shows `Codex Usage`, from the bundle's own filename; `CFBundleName`/`CFBundleDisplayName` match it.
 - Spacing and layout: icon uses the standard macOS rounded-square silhouette and optical padding.
 - Colors and tokens: charcoal, off-white, and blue remain legible in Finder's light appearance.
 - Image quality: ICNS contains the standard 16–1024 px representations; no missing-icon placeholder or visible transparency halo.

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Codex Usage is a macOS 14+ menu-bar-only utility (`LSUIElement = true`, no Dock icon) that shows the remaining percentage of the user's five-hour Codex usage window. The popover also shows the seven-day window, reset times, credit balance, refresh/error state, Launch at Login, and a link to the usage page.
 
-It is a Swift Package Manager executable staged into `/Applications/Codex Balance.app` by shell scripts (there is no Xcode project). Its stable bundle id is `com.kelvin.codexbalance`; its user-facing display name remains Codex Usage.
+It is a Swift Package Manager executable staged into `/Applications/Codex Usage.app` by shell scripts (there is no Xcode project). Its bundle id is `com.kelvin.codexbalance` — kept stable across the pre-1.0 rename from "Codex Balance", so do not change it.
 
 ## Commands
 
@@ -69,12 +69,14 @@ script/
   build_and_run.sh               build, bundle, install, launch/debug/logs
   qa.sh                          full local release QA gate
   package_release.sh             Mandatory Developer ID signing + notarization
-handoff.md                       engineering handoff: status, risks, next steps
 design-qa.md                     visual QA record (Finder/Quick Look icon checks)
+docs/screenshots/                README screenshots
+README.md / LICENSE / PRIVACY.md
 ```
 
-## Known constraints (see `handoff.md` for full detail)
+## Known constraints
 
-- `arm64`-only build today; public release packaging requires Developer ID signing and notarization credentials.
+- Public release packaging requires Developer ID signing and notarization credentials.
+- Release builds are universal (arm64 + x86_64). SwiftPM's multi-arch build needs full Xcode, so `build_and_run.sh` builds each slice separately and joins them with `lipo` when `CODEX_BALANCE_UNIVERSAL=1` (set by `qa.sh` and `package_release.sh`); plain dev builds stay single-arch for speed.
 - Sandboxing (Mac App Store) is unproven for this subprocess-launching architecture — do not add sandbox entitlements without first validating that a sandboxed build can discover/launch/talk to the user's Codex CLI.
 - The product includes an explicit unofficial/non-affiliation disclosure.
