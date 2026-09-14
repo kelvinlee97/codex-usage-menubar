@@ -18,21 +18,15 @@ struct CodexBalanceApp: App {
         MenuBarExtra {
             UsagePopoverView(store: store)
         } label: {
-            HStack(spacing: 4) {
-                menuBarIcon
-                    .frame(width: 18, height: 18)
-                Text(store.menuBarText)
-                    .monospacedDigit()
-            }
+            // One Text, not an HStack of two: MenuBarExtra renders only the first
+            // sibling in a multi-view label, which silently dropped the percentage.
+            Text("Codex \(store.menuBarText)")
+                .monospacedDigit()
                 .opacity(store.isShowingStaleData ? 0.55 : 1)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(store.accessibilityLabel)
                 .task { store.start() }
         }
         .menuBarExtraStyle(.window)
-    }
-
-    private var menuBarIcon: Image {
-        Image(systemName: "gauge.with.dots.needle.67percent")
     }
 }

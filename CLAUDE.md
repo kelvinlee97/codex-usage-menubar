@@ -47,7 +47,7 @@ Data flow: `UsageStore` (`@MainActor ObservableObject`) polls `CodexUsageClient`
 
 `CodexExecutableResolver` searches, in order: `CODEX_CLI_PATH` env var, the bundled ChatGPT.app resource path, every directory in `PATH`, then Homebrew/npm/version-manager fallback paths (`/opt/homebrew/bin`, `~/.volta/bin`, `~/.asdf/shims`, etc.).
 
-The menu-bar glyph uses the built-in monochrome SF Symbol `gauge.with.dots.needle.67percent`.
+The menu-bar label is the text wordmark `Codex` followed by the remaining percentage (`CodexBalanceApp.swift`); it carries no icon.
 
 `LoginItemManager` wraps `SMAppService.mainApp` for the user-controlled Launch-at-Login toggle.
 
@@ -57,7 +57,7 @@ The menu-bar glyph uses the built-in monochrome SF Symbol `gauge.with.dots.needl
 Package.swift
 Assets/                          AppIcon source art + packaged .icns
 Sources/CodexBalance/
-  App/CodexBalanceApp.swift      MenuBarExtra scene and menu-bar icon
+  App/CodexBalanceApp.swift      MenuBarExtra scene and menu-bar label
   Models/UsageSnapshot.swift     UsageSnapshot / UsageWindow value types
   Services/CodexExecutableResolver.swift
   Services/CodexUsageClient.swift  app-server subprocess + JSON-RPC client
