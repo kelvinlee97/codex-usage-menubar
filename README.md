@@ -1,6 +1,8 @@
-# Codex Balance
+# Codex Usage
 
 A macOS menu-bar utility that shows your remaining [Codex CLI](https://github.com/openai/codex) usage at a glance: the current 5-hour window, the 7-day window, reset times, and your credit balance.
+
+Unofficial and not affiliated with OpenAI.
 
 No Dock icon, no window to manage — it lives in the menu bar and polls the local Codex CLI every 30 seconds.
 
@@ -19,6 +21,8 @@ git clone https://github.com/kelvinlee97/codex-usage-menubar.git
 cd codex-usage-menubar
 ./script/build_and_run.sh
 ```
+
+The installed bundle remains `/Applications/Codex Balance.app` for upgrade and Launch-at-Login compatibility, while Finder and the menu bar show the product name **Codex Usage**.
 
 The app appears in your menu bar showing your remaining usage percentage. Click it to open the popover with full details, a link to the Codex usage page, and a Launch at Login toggle.
 
@@ -61,22 +65,22 @@ Run the full local QA gate (release build, self-check, bundle/icon/signature che
 
 ```bash
 DEVELOPER_ID_APPLICATION="Developer ID Application: Your Name (TEAMID)" \
-NOTARY_PROFILE="codex-balance-notary" \
+NOTARY_PROFILE="codex-usage-notary" \
 ./script/package_release.sh
 ```
 
-Omit `NOTARY_PROFILE` to sign without notarizing; the output is `dist/CodexBalance.zip`.
+Public release packaging requires both variables and fails immediately if either is missing. It signs, notarizes, staples, rebuilds, and verifies `dist/CodexUsage.zip`.
 
 ## How it works
 
-Codex Balance locates the Codex CLI on your machine, launches `codex app-server --stdio`, and talks to it over stdin/stdout to read your account's rate-limit and credit-balance data. This is not a public/stable API — it's the same interface the Codex CLI itself uses locally, so it may change between Codex CLI releases.
+Codex Usage locates the Codex CLI on your machine, launches `codex app-server --stdio`, and talks to it over stdin/stdout to read your account's rate-limit and credit-balance data. This is not a public/stable API — it's the same interface the Codex CLI itself uses locally, so it may change between Codex CLI releases.
 
 ## Known limitations
 
 See [handoff.md](handoff.md) for the full list, including:
 
 - Apple Silicon (`arm64`) only for now.
-- The menu-bar glyph currently borrows ChatGPT.app's bundled icon when installed, falling back to a system symbol otherwise — an original icon is planned before any wider release.
+- The menu-bar glyph uses a built-in monochrome SF Symbol.
 - Not sandboxed; App Store distribution is unproven for this architecture.
 
 ## License

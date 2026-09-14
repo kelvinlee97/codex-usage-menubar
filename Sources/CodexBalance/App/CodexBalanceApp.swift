@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 @main
@@ -28,11 +27,6 @@ struct CodexBalanceApp: App {
     }
 
     private var menuBarIcon: Image {
-        let path = "/Applications/ChatGPT.app/Contents/Resources/chatgptTemplate@2x.png"
-        guard let image = NSImage(contentsOfFile: path) else {
-            return Image(systemName: "sparkles")
-        }
-        image.isTemplate = true
-        return Image(nsImage: image)
+        Image(systemName: "gauge.with.dots.needle.67percent")
     }
 }

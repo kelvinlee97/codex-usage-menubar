@@ -108,6 +108,11 @@ struct UsagePopoverView: View {
                 }
                 .keyboardShortcut("q", modifiers: .command)
             }
+
+            Text("Unofficial; not affiliated with OpenAI.")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(16)
         .frame(width: 320)

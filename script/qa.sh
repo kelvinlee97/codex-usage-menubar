@@ -16,7 +16,7 @@ CODEX_BALANCE_CONFIGURATION=release "$ROOT_DIR/script/build_and_run.sh" --verify
 test -x "$APP_BUNDLE/Contents/MacOS/CodexBalance"
 test -s "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 test "$(plutil -extract CFBundleIconFile raw "$INFO_PLIST")" = "AppIcon"
-test "$(plutil -extract CFBundleDisplayName raw "$INFO_PLIST")" = "Codex Balance"
+test "$(plutil -extract CFBundleDisplayName raw "$INFO_PLIST")" = "Codex Usage"
 codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
 file "$APP_BUNDLE/Contents/MacOS/CodexBalance"
 

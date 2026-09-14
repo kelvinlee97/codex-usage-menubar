@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Product
 
-Codex Balance is a macOS 14+ menu-bar-only utility (`LSUIElement = true`, no Dock icon) that shows the remaining percentage of the user's five-hour Codex usage window. The popover also shows the seven-day window, reset times, credit balance, refresh/error state, Launch at Login, and a link to the usage page.
+Codex Usage is a macOS 14+ menu-bar-only utility (`LSUIElement = true`, no Dock icon) that shows the remaining percentage of the user's five-hour Codex usage window. The popover also shows the seven-day window, reset times, credit balance, refresh/error state, Launch at Login, and a link to the usage page.
 
-It is a Swift Package Manager executable staged into a `.app` bundle by shell scripts (there is no Xcode project). Bundle id: `com.kelvin.codexbalance`.
+It is a Swift Package Manager executable staged into `/Applications/Codex Balance.app` by shell scripts (there is no Xcode project). Its stable bundle id is `com.kelvin.codexbalance`; its user-facing display name remains Codex Usage.
 
 ## Commands
 
@@ -27,13 +27,13 @@ CODEX_BALANCE_SELF_CHECK=1 swift run CodexBalance
 ```
 This is the project's only test harness — there is no XCTest target (`Tests/CodexBalanceTests` is empty). New self-check assertions go in `Sources/CodexBalance/Support/SelfCheck.swift`; it runs when that env var is set, asserts with `precondition`, and calls `exit()`.
 
-Package a signed (and optionally notarized) release zip:
+Package a signed and notarized public release zip:
 ```bash
 DEVELOPER_ID_APPLICATION="Developer ID Application: Your Name (TEAMID)" \
-NOTARY_PROFILE="codex-balance-notary" \
+NOTARY_PROFILE="codex-usage-notary" \
 ./script/package_release.sh
 ```
-Without `NOTARY_PROFILE` it signs and produces `dist/CodexBalance.zip` but skips notarization.
+Both variables are mandatory. The script signs, notarizes, staples before rebuilding the final `dist/CodexUsage.zip`, then validates the extracted app with `stapler` and `spctl`.
 
 Plain compile/typecheck without the bundling steps: `swift build`.
 
@@ -47,7 +47,7 @@ Data flow: `UsageStore` (`@MainActor ObservableObject`) polls `CodexUsageClient`
 
 `CodexExecutableResolver` searches, in order: `CODEX_CLI_PATH` env var, the bundled ChatGPT.app resource path, every directory in `PATH`, then Homebrew/npm/version-manager fallback paths (`/opt/homebrew/bin`, `~/.volta/bin`, `~/.asdf/shims`, etc.).
 
-The menu-bar glyph currently loads `/Applications/ChatGPT.app/Contents/Resources/chatgptTemplate@2x.png` as a template image, falling back to the SF Symbol `sparkles` if ChatGPT.app isn't installed there. Before commercial release, replace the ChatGPT menu-bar mark with an original bundled monochrome template asset — depending on another application's private resource path is fragile, and using the ChatGPT mark may create trademark or implied-endorsement risk (see `handoff.md`).
+The menu-bar glyph uses the built-in monochrome SF Symbol `gauge.with.dots.needle.67percent`.
 
 `LoginItemManager` wraps `SMAppService.mainApp` for the user-controlled Launch-at-Login toggle.
 
@@ -68,13 +68,13 @@ Sources/CodexBalance/
 script/
   build_and_run.sh               build, bundle, install, launch/debug/logs
   qa.sh                          full local release QA gate
-  package_release.sh             Developer ID signing + optional notarization
+  package_release.sh             Mandatory Developer ID signing + notarization
 handoff.md                       engineering handoff: status, risks, next steps
 design-qa.md                     visual QA record (Finder/Quick Look icon checks)
 ```
 
 ## Known constraints (see `handoff.md` for full detail)
 
-- `arm64`-only build today; no Developer ID signature/notarization on the current release script output by default.
+- `arm64`-only build today; public release packaging requires Developer ID signing and notarization credentials.
 - Sandboxing (Mac App Store) is unproven for this subprocess-launching architecture — do not add sandbox entitlements without first validating that a sandboxed build can discover/launch/talk to the user's Codex CLI.
-- Product name and menu-bar icon both currently reference OpenAI/ChatGPT branding and must be reviewed against OpenAI's brand guidelines before any commercial release.
+- The product includes an explicit unofficial/non-affiliation disclosure.
