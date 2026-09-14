@@ -27,7 +27,7 @@ Codex CLI's usage limits reset on rolling windows, and it's easy to burn through
 - **Credit balance** — pulled straight from your Codex account
 - **Launch at Login** — one toggle, no extra setup
 
-No Dock icon, no window to manage — it lives in the menu bar and polls the local Codex CLI every 30 seconds.
+No Dock icon, no window to manage — it lives in the menu bar and polls the local Codex CLI every two minutes (and whenever you open it).
 
 > Unofficial and not affiliated with OpenAI.
 
@@ -115,6 +115,8 @@ Codex Usage locates the Codex CLI on your machine, launches `codex app-server --
 - macOS only — no Windows or Linux support.
 - The menu-bar glyph uses a built-in monochrome SF Symbol.
 - Not sandboxed; App Store distribution is unproven for this architecture.
+- No automatic updater or DMG installer.
+- Usage data comes from the Codex CLI's local app-server protocol, which is not a stable public API and can change between Codex releases.
 - Builds from source are ad-hoc signed; only the published release is Developer ID signed and notarized.
 - No automatic updater, DMG installer, or crash reporting.
 - Usage retrieval depends on the local Codex CLI's app-server protocol, which is not a stable public API.

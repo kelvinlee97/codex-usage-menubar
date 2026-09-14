@@ -39,9 +39,9 @@ Plain compile/typecheck without the bundling steps: `swift build`.
 
 ## Architecture
 
-Data flow: `UsageStore` (`@MainActor ObservableObject`) polls `CodexUsageClient` every 30s and exposes `snapshot`/`errorMessage`/`isRefreshing` to SwiftUI. `CodexBalanceApp` is a `MenuBarExtra` scene whose label reads `store.menuBarText` and whose window content is `UsagePopoverView`.
+Data flow: `UsageStore` (`@MainActor ObservableObject`) polls `CodexUsageClient` on the `PollSchedule` cadence (120s after a success; 30s doubling to a 300s cap after failures) and exposes `snapshot`/`errorMessage`/`isRefreshing`/`consecutiveFailures` to SwiftUI. Concurrent refreshes coalesce onto one in-flight task, and polling suspends (releasing the subprocess) on `NSWorkspace.willSleepNotification`, resuming on wake. `CodexBalanceApp` is a `MenuBarExtra` scene whose label reads `store.menuBarText` and whose window content is `UsagePopoverView`.
 
-`CodexUsageClient` (an `actor`) is the core integration point: it locates a Codex CLI via `CodexExecutableResolver`, launches `codex app-server --stdio` as a subprocess, and speaks a line-delimited JSON-RPC-like protocol over stdin/stdout (`initialize`, then `account/rateLimits/read`). Reads use `poll()`/`read()` on the raw file descriptor with a hard 10s timeout (`waitUntilReadable`/`readAvailable`); any error tears down and restarts the subprocess on the next call. Response parsing (`decodeSnapshot`) reads `rateLimitsByLimitId.codex`, falling back to top-level `rateLimits`, into `UsageSnapshot`/`UsageWindow` (`Models/UsageSnapshot.swift`).
+`CodexUsageClient` (a `@unchecked Sendable` class confining all state to one serial `DispatchQueue` — the blocking `poll()`/`read()` calls must stay off the Swift concurrency cooperative pool) is the core integration point: it locates a Codex CLI via `CodexExecutableResolver`, launches `codex app-server --stdio` as a subprocess, and speaks a line-delimited JSON-RPC-like protocol over stdin/stdout (`initialize`, then `account/rateLimits/read`). Reads use `poll()`/`read()` on the raw file descriptor with a hard 10s timeout (`waitUntilReadable`/`readAvailable`); any error tears down and restarts the subprocess on the next call. Response parsing (`decodeSnapshot`) reads `rateLimitsByLimitId.codex`, falling back to top-level `rateLimits`, into `UsageSnapshot`/`UsageWindow` (`Models/UsageSnapshot.swift`).
 
 **This app-server JSON protocol is not a stable/public Codex API** — it was reverse-engineered against the locally installed Codex CLI. Protocol or field-name changes in future Codex releases are the primary maintenance risk; when touching `CodexUsageClient`, keep parse failures surfaced to the user (via `errorMessage`) rather than silently swallowed, and re-run `./script/qa.sh` against a current Codex install before shipping.
 
@@ -63,6 +63,7 @@ Sources/CodexBalance/
   Services/CodexUsageClient.swift  app-server subprocess + JSON-RPC client
   Stores/UsageStore.swift        polling + published state for the UI
   Support/LoginItemManager.swift
+  Support/PollSchedule.swift     poll interval + failure backoff
   Support/SelfCheck.swift        CODEX_BALANCE_SELF_CHECK harness
   Views/UsagePopoverView.swift
 script/

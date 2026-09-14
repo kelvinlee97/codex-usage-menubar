@@ -1,12 +1,17 @@
 import Foundation
 
 struct UsageWindow: Equatable, Sendable {
-    let usedPercent: Int
+    let usedPercent: Double
     let windowDurationMinutes: Int?
     let resetsAt: Date?
 
+    /// Rounded for display, but never rounds *to* an endpoint: "0% left" means the window is
+    /// genuinely exhausted and "100%" means it is untouched.
     var remainingPercent: Int {
-        min(100, max(0, 100 - usedPercent))
+        let remaining = 100 - usedPercent
+        if remaining <= 0 { return 0 }
+        if remaining >= 100 { return 100 }
+        return min(99, max(1, Int(remaining.rounded())))
     }
 
     var title: String {
@@ -16,6 +21,12 @@ struct UsageWindow: Equatable, Sendable {
         case let minutes?: "\(minutes) minutes"
         case nil: "Usage"
         }
+    }
+
+    /// True once a snapshot's reset time has passed; the data is awaiting a refresh.
+    func hasReset(asOf now: Date = Date()) -> Bool {
+        guard let resetsAt else { return false }
+        return resetsAt <= now
     }
 }
 

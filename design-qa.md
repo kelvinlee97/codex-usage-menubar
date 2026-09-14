@@ -30,6 +30,6 @@ No actionable P0, P1, or P2 visual issues found.
 
 ## Automated QA
 
-`script/qa.sh` passed the release build, parser/timeout self-check, bundle metadata, ICNS presence, code-signature integrity, process launch, and live Codex usage refresh. The current artifact is ad-hoc signed and arm64-only; Developer ID notarization and Universal 2 compilation are release gates, not visual defects.
+`script/qa.sh` passed the release build, parser/timeout self-check, bundle metadata, ICNS presence, code-signature integrity, process launch, and live Codex usage refresh. Locally built artifacts are ad-hoc signed; Developer ID signing and notarization are release gates, not visual defects. Release builds are universal (arm64 + x86_64).
 
 final result: passed

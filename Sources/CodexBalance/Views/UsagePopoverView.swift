@@ -118,7 +118,7 @@ struct UsagePopoverView: View {
         .frame(width: 320)
         .onAppear {
             launchAtLogin = LoginItemManager.isEnabled
-            Task { await store.refresh() }
+            Task { await store.refreshIfStale() }
         }
     }
 }
@@ -141,8 +141,13 @@ private struct QuotaRow: View {
                 .accessibilityValue("\(window.remainingPercent) percent")
             if let resetsAt = window.resetsAt {
                 HStack(spacing: 3) {
-                    Text("Resets")
-                    Text(resetsAt, style: .relative)
+                    if window.hasReset() {
+                        // Without this the relative style counts upward: "Resets 4 minutes ago".
+                        Text("Resetting…")
+                    } else {
+                        Text("Resets")
+                        Text(resetsAt, style: .relative)
+                    }
                 }
                     .font(.caption)
                     .foregroundStyle(.secondary)

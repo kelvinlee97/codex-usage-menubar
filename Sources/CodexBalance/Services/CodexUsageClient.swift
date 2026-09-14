@@ -1,7 +1,12 @@
 import Darwin
 import Foundation
 
-actor CodexUsageClient {
+/// Talks to `codex app-server --stdio` over a line-delimited JSON-RPC-like protocol.
+///
+/// All subprocess state is confined to `queue`. The blocking `poll()`/`read()` calls must never run
+/// on a Swift concurrency cooperative thread: a hung Codex CLI would park that thread for the full
+/// request timeout and starve unrelated async work.
+final class CodexUsageClient: @unchecked Sendable {
     enum ClientError: LocalizedError {
         case codexNotFound
         case serverStopped
@@ -26,13 +31,37 @@ actor CodexUsageClient {
     }
 
     private let requestTimeout: TimeInterval = 10
+    private let queue = DispatchQueue(label: "com.kelvin.codexbalance.app-server")
     private var process: Process?
     private var input: FileHandle?
     private var output: FileHandle?
     private var readBuffer = Data()
     private var nextID = 1
 
-    func fetchUsage() throws -> UsageSnapshot {
+    func fetchUsage() async throws -> UsageSnapshot {
+        try await withCheckedThrowingContinuation { continuation in
+            queue.async {
+                do {
+                    continuation.resume(returning: try self.fetchUsageOnQueue())
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+
+    /// Tears the subprocess down; used when polling suspends (display sleep) so nothing idles.
+    func shutDown() async {
+        await withCheckedContinuation { continuation in
+            queue.async {
+                self.stop()
+                continuation.resume()
+            }
+        }
+    }
+
+    private func fetchUsageOnQueue() throws -> UsageSnapshot {
+        dispatchPrecondition(condition: .onQueue(queue))
         do {
             try startIfNeeded()
             let result = try request(
@@ -49,10 +78,20 @@ actor CodexUsageClient {
         }
     }
 
-    func stop() {
+    private func stop() {
+        dispatchPrecondition(condition: .onQueue(queue))
         try? input?.close()
-        if process?.isRunning == true {
-            process?.terminate()
+        try? output?.close()
+        if let process, process.isRunning {
+            // Reaping matters: without it the child lingers as a zombie until the app exits, and
+            // every transient failure leaks one more. But a plain `waitUntilExit()` after SIGTERM
+            // would block this queue forever if the CLI ignores the signal - the exact case that
+            // gets us here - so escalate to SIGKILL, which cannot be ignored.
+            process.terminate()
+            if !Self.waitForExit(process, timeout: 2) {
+                kill(process.processIdentifier, SIGKILL)
+            }
+            process.waitUntilExit()
         }
         process = nil
         input = nil
@@ -60,8 +99,18 @@ actor CodexUsageClient {
         readBuffer.removeAll(keepingCapacity: true)
     }
 
+    private static func waitForExit(_ process: Process, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while process.isRunning {
+            guard Date() < deadline else { return false }
+            usleep(20_000)
+        }
+        return true
+    }
+
     private func startIfNeeded() throws {
         if process?.isRunning == true { return }
+        stop()
         guard let executableURL = CodexExecutableResolver.resolve() else {
             throw ClientError.codexNotFound
         }
@@ -86,15 +135,20 @@ actor CodexUsageClient {
             method: "initialize",
             params: [
                 "clientInfo": [
-                    "name": "codex-balance",
-                    "version": "1.0.0",
+                    "name": "codex-usage",
+                    "version": Self.clientVersion,
                 ],
                 "capabilities": [:],
             ]
         )
     }
 
+    private static var clientVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+    }
+
     private func request(method: String, params: [String: Any]) throws -> Data {
+        dispatchPrecondition(condition: .onQueue(queue))
         guard let input else { throw ClientError.serverStopped }
         let id = nextID
         nextID += 1
@@ -106,6 +160,8 @@ actor CodexUsageClient {
 
         let deadline = Date().addingTimeInterval(requestTimeout)
         while true {
+            // Unrelated notifications are skipped; `nextObject` enforces the deadline, so a chatty
+            // server cannot keep us here past the timeout.
             let object = try nextObject(deadline: deadline)
             guard (object["id"] as? NSNumber)?.intValue == id else { continue }
             if let error = object["error"] as? [String: Any] {
@@ -204,7 +260,7 @@ private struct RateLimitWindow: Decodable {
 
     var usageWindow: UsageWindow {
         UsageWindow(
-            usedPercent: Int(usedPercent.rounded()),
+            usedPercent: usedPercent,
             windowDurationMinutes: windowDurationMins,
             resetsAt: resetsAt.map(Date.init(timeIntervalSince1970:))
         )
