@@ -181,24 +181,28 @@ The current subprocess architecture should be considered incompatible until prov
 
 ## Commercial and brand risks
 
-- `Codex Balance` contains an OpenAI product name. Confirm that the final product name complies with OpenAI's current brand guidelines before publishing.
-- Do not imply that the app is built, supported, certified, or endorsed by OpenAI.
-- Replace the ChatGPT menu-bar icon before sale unless explicit permission covers that use.
-- Clearly disclose that Codex/ChatGPT installation, authentication, and an eligible user plan may be required.
-- Add a privacy policy even if no analytics are collected; state what stays local and whether any diagnostics leave the Mac.
+- `Codex Usage` contains an OpenAI product name. **Still needs a human/legal decision**: confirm the final product name complies with OpenAI's current brand guidelines before publishing — this cannot be resolved by code changes.
+- Do not imply that the app is built, supported, certified, or endorsed by OpenAI. Done: the popover and README both carry an "Unofficial; not affiliated with OpenAI" disclosure, and the menu-bar glyph is the built-in SF Symbol `gauge.with.dots.needle.67percent` (no dependency on ChatGPT.app's private resources).
+- Clearly disclose that Codex/ChatGPT installation, authentication, and an eligible user plan may be required. Done in README's prerequisites section; the in-app error message also tells the user directly when the Codex CLI can't be found (`Codex CLI was not found. Install Codex or set CODEX_CLI_PATH.`).
+- Privacy policy: added, see `PRIVACY.md`.
 - Add Terms of Sale, refund handling, support contact details, and license activation only when the chosen sales channel requires them.
 
 Safer neutral product-name directions include `QuotaBar`, `Usage Meter`, or `Token Balance`, subject to normal trademark checks. (`QuotaBar` was tried on 2026-09-14 and reverted at the user's request — the product is intentionally named after Codex.)
 
-## Highest-priority next steps
+## Highest-priority next steps (require the maintainer, not code)
 
-1. Choose the final commercial name and replace the menu-bar ChatGPT mark with an original bundled template icon.
-2. Install full Xcode and produce/test a Universal 2 release, or explicitly document Apple Silicon-only support.
-3. Enroll in the Apple Developer Program and install a Developer ID certificate.
-4. Run the signing/notarization script and test Gatekeeper acceptance on a clean machine.
-5. Add first-run prerequisite guidance for missing Codex CLI, signed-out accounts, and unsupported Codex versions.
-6. Add update delivery, crash reporting/privacy decisions, a support URL, and a public privacy policy.
-7. Beta test across supported macOS versions, display scales, light/dark appearances, offline state, expired sessions, missing CLI, hung CLI, and changed server responses.
+1. Enroll in the Apple Developer Program and install a Developer ID Application certificate — no code path exists to fix this; it requires a paid account and Apple's approval.
+2. Run `./script/package_release.sh` with real `DEVELOPER_ID_APPLICATION`/`NOTARY_PROFILE` values once the certificate exists, and test Gatekeeper acceptance on a clean Mac.
+3. Confirm the product name against OpenAI's current brand guidelines — a legal/judgment call, not something to auto-fix.
+4. Install full Xcode and produce/test a Universal 2 release, or explicitly document Apple Silicon-only support.
+5. Beta test across supported macOS versions, display scales, light/dark appearances, offline state, expired sessions, missing CLI, hung CLI, and changed server responses.
+
+## Already addressed in code/docs
+
+- Menu-bar icon no longer depends on ChatGPT.app's private resource path (uses SF Symbol `gauge.with.dots.needle.67percent`).
+- Non-affiliation disclosure present in-app (popover footer) and in README.
+- Missing-CLI guidance is surfaced directly in the app's error message.
+- `PRIVACY.md` added, describing the fully-local data flow and third-party (Codex CLI) dependency.
 
 ## Known limitations
 
