@@ -81,4 +81,4 @@ See [handoff.md](handoff.md) for the full list, including:
 
 ## License
 
-No license file yet — all rights reserved by the author until one is added.
+[MIT](LICENSE)
