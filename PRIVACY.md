@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Codex Usage is a local macOS menu-bar utility. It does not collect, transmit, or store any personal data on remote servers.
+Codex Usage Menubar is a local macOS menu-bar utility. It does not collect, transmit, or store any personal data on remote servers.
 
 ## What the app does
 
@@ -21,7 +21,7 @@ This app reads data from your local Codex CLI installation (`https://github.com/
 
 ## Disclosure
 
-Codex Usage is an independent, unofficial utility and is not affiliated with, endorsed by, or supported by OpenAI.
+Codex Usage Menubar is an independent, unofficial utility and is not affiliated with, endorsed by, or supported by OpenAI.
 
 ## Contact
 

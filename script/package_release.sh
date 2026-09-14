@@ -5,8 +5,8 @@ set -euo pipefail
 : "${NOTARY_PROFILE:?Set NOTARY_PROFILE to the notarytool keychain profile for a public release}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_BUNDLE="$ROOT_DIR/dist/Codex Usage.app"
-ZIP_PATH="$ROOT_DIR/dist/CodexUsage.zip"
+APP_BUNDLE="$ROOT_DIR/dist/Codex Usage Menubar.app"
+ZIP_PATH="$ROOT_DIR/dist/CodexUsageMenubar.zip"
 VERIFY_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-usage-release.XXXXXX")"
 STAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-usage-stage.XXXXXX")"
 trap 'rm -rf "$VERIFY_DIR" "$STAGE_DIR"' EXIT

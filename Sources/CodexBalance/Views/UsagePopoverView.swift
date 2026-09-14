@@ -10,7 +10,7 @@ struct UsagePopoverView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Codex Usage")
+                Text("Codex Usage Menubar")
                     .font(.headline)
                 Spacer()
                 if store.isRefreshing {

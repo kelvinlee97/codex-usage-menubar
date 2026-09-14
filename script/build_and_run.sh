@@ -3,8 +3,8 @@ set -euo pipefail
 
 MODE="${1:-run}"
 APP_NAME="CodexBalance"
-APP_DISPLAY_NAME="Codex Usage"
-APP_BUNDLE_NAME="Codex Usage"
+APP_DISPLAY_NAME="Codex Usage Menubar"
+APP_BUNDLE_NAME="Codex Usage Menubar"
 BUNDLE_ID="com.kelvin.codexbalance"
 MIN_SYSTEM_VERSION="14.0"
 APP_VERSION="${CODEX_BALANCE_VERSION:-1.0.0}"
@@ -87,11 +87,13 @@ PLIST
 
 codesign --force --options runtime --sign - "$APP_BUNDLE"
 mkdir -p "$INSTALL_DIR"
-# Remove the pre-1.0 bundle name so a rename does not leave two copies behind.
-LEGACY_BUNDLE="$INSTALL_DIR/Codex Balance.app"
-if [[ "$LEGACY_BUNDLE" != "$INSTALLED_BUNDLE" && -d "$LEGACY_BUNDLE" ]]; then
-  rm -rf "$LEGACY_BUNDLE"
-fi
+# Remove pre-1.0 bundle names so a rename does not leave stale copies behind.
+for legacy in "Codex Balance" "Codex Usage"; do
+  LEGACY_BUNDLE="$INSTALL_DIR/$legacy.app"
+  if [[ "$LEGACY_BUNDLE" != "$INSTALLED_BUNDLE" && -d "$LEGACY_BUNDLE" ]]; then
+    rm -rf "$LEGACY_BUNDLE"
+  fi
+done
 rm -rf "$INSTALLED_BUNDLE"
 cp -R "$APP_BUNDLE" "$INSTALLED_BUNDLE"
 

@@ -40,7 +40,7 @@ Steps 1–4 need an Apple account in a browser and must be done by hand.
       ./script/package_release.sh
       ```
 - [ ] **6. Tag and publish.** `git tag v1.0.0 && git push --tags`, create the
-      GitHub release, attach `dist/CodexUsage.zip`. README already links to
+      GitHub release, attach `dist/CodexUsageMenubar.zip`. README already links to
       `/releases/latest`, so the download goes live the moment you publish.
 - [ ] **7. Clean-machine install test.** Download the published asset in a browser
       (not a local file copy — quarantine only attaches to a real download), on
@@ -86,7 +86,7 @@ Steps 1–4 need an Apple account in a browser and must be done by hand.
 
 ## Done this session
 
-- Bundle renamed to `Codex Usage.app`; bundle id `com.kelvin.codexbalance` unchanged.
+- Bundle renamed to `Codex Usage Menubar.app`; bundle id `com.kelvin.codexbalance` unchanged.
 - Universal release binary (arm64 + x86_64) via per-arch builds joined with `lipo`.
 - `package_release.sh` no longer replaces `/Applications` with an ad-hoc-signed copy.
 - SIGPIPE ignored, so a dead Codex subprocess can no longer kill the app silently.

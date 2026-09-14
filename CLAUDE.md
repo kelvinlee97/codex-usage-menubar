@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Product
 
-Codex Usage is a macOS 14+ menu-bar-only utility (`LSUIElement = true`, no Dock icon) that shows the remaining percentage of the user's five-hour Codex usage window. The popover also shows the seven-day window, reset times, credit balance, refresh/error state, Launch at Login, and a link to the usage page.
+Codex Usage Menubar is a macOS 14+ menu-bar-only utility (`LSUIElement = true`, no Dock icon) that shows the remaining percentage of the user's five-hour Codex usage window. The popover also shows the seven-day window, reset times, credit balance, refresh/error state, Launch at Login, and a link to the usage page.
 
-It is a Swift Package Manager executable staged into `/Applications/Codex Usage.app` by shell scripts (there is no Xcode project). Its bundle id is `com.kelvin.codexbalance` — kept stable across the pre-1.0 rename from "Codex Balance", so do not change it.
+It is a Swift Package Manager executable staged into `/Applications/Codex Usage Menubar.app` by shell scripts (there is no Xcode project). Its bundle id is `com.kelvin.codexbalance` — kept stable across the pre-1.0 renames from "Codex Balance" and "Codex Usage", so do not change it.
 
 ## Commands
 
@@ -33,7 +33,7 @@ DEVELOPER_ID_APPLICATION="Developer ID Application: Your Name (TEAMID)" \
 NOTARY_PROFILE="codex-usage-notary" \
 ./script/package_release.sh
 ```
-Both variables are mandatory. The script signs, notarizes, staples before rebuilding the final `dist/CodexUsage.zip`, then validates the extracted app with `stapler` and `spctl`.
+Both variables are mandatory. The script signs, notarizes, staples before rebuilding the final `dist/CodexUsageMenubar.zip`, then validates the extracted app with `stapler` and `spctl`.
 
 Plain compile/typecheck without the bundling steps: `swift build`.
 

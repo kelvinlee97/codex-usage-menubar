@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="Assets/AppIcon.png" width="120" alt="Codex Usage app icon" />
+<img src="Assets/AppIcon.png" width="120" alt="Codex Usage Menubar app icon" />
 
-# Codex Usage
+# Codex Usage Menubar
 
 **Your Codex CLI usage, always one glance away.**
 
@@ -14,13 +14,13 @@ A tiny macOS menu-bar app that shows your remaining 5-hour and 7-day [Codex CLI]
 
 <sub>🍎 macOS only — this is a native menu-bar app and does not run on Windows or Linux.</sub>
 
-<img src="docs/screenshots/popover.png" width="420" alt="Codex Usage popover showing 5-hour and 7-day usage limits and credit balance" />
+<img src="docs/screenshots/popover.png" width="420" alt="Codex Usage Menubar popover showing 5-hour and 7-day usage limits and credit balance" />
 
 </div>
 
 ## Why
 
-Codex CLI's usage limits reset on rolling windows, and it's easy to burn through a session without realizing you're close to the wall. Codex Usage sits quietly in your menu bar and answers one question at a glance: *how much do I have left?*
+Codex CLI's usage limits reset on rolling windows, and it's easy to burn through a session without realizing you're close to the wall. Codex Usage Menubar sits quietly in your menu bar and answers one question at a glance: *how much do I have left?*
 
 - **5-hour window** — percentage remaining and exact reset time
 - **7-day window** — percentage remaining and exact reset time
@@ -39,8 +39,8 @@ No Dock icon, no window to manage — it lives in the menu bar and polls the loc
 
 ## Download
 
-1. Grab `CodexUsage.zip` from the [latest release](https://github.com/kelvinlee97/codex-usage-menubar/releases/latest).
-2. Unzip it and drag **Codex Usage.app** into `/Applications`.
+1. Grab `CodexUsageMenubar.zip` from the [latest release](https://github.com/kelvinlee97/codex-usage-menubar/releases/latest).
+2. Unzip it and drag **Codex Usage Menubar.app** into `/Applications`.
 3. Launch it. The app is signed with a Developer ID certificate and notarized by Apple, so it opens normally — no Gatekeeper warning and no right-click-to-open workaround.
 
 You'll see the usage percentage appear in your menu bar. If it shows an error instead, confirm `codex login` works in your terminal first.
@@ -55,7 +55,7 @@ cd codex-usage-menubar
 ./script/build_and_run.sh
 ```
 
-This installs `/Applications/Codex Usage.app`.
+This installs `/Applications/Codex Usage Menubar.app`.
 
 The app appears in your menu bar showing your remaining usage percentage. Click it to open the popover with full details, a link to the Codex usage page, and a Launch at Login toggle.
 
@@ -104,11 +104,11 @@ NOTARY_PROFILE="codex-usage-notary" \
 ./script/package_release.sh
 ```
 
-Public release packaging requires both variables and fails immediately if either is missing. It signs, notarizes, staples, rebuilds, and verifies `dist/CodexUsage.zip`.
+Public release packaging requires both variables and fails immediately if either is missing. It signs, notarizes, staples, rebuilds, and verifies `dist/CodexUsageMenubar.zip`.
 
 ## How it works
 
-Codex Usage locates the Codex CLI on your machine, launches `codex app-server --stdio`, and talks to it over stdin/stdout to read your account's rate-limit and credit-balance data. This is not a public/stable API — it's the same interface the Codex CLI itself uses locally, so it may change between Codex CLI releases.
+Codex Usage Menubar locates the Codex CLI on your machine, launches `codex app-server --stdio`, and talks to it over stdin/stdout to read your account's rate-limit and credit-balance data. This is not a public/stable API — it's the same interface the Codex CLI itself uses locally, so it may change between Codex CLI releases.
 
 ## Known limitations
 

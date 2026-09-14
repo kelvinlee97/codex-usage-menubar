@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INSTALL_DIR="${CODEX_BALANCE_INSTALL_DIR:-/Applications}"
 UNIVERSAL="${CODEX_BALANCE_UNIVERSAL:-1}"
-APP_BUNDLE="$INSTALL_DIR/Codex Usage.app"
+APP_BUNDLE="$INSTALL_DIR/Codex Usage Menubar.app"
 INFO_PLIST="$APP_BUNDLE/Contents/Info.plist"
 
 fail() { echo "QA failed: $*" >&2; exit 1; }
@@ -35,7 +35,7 @@ require "the app binary is missing or not executable" \
 require "the app icon is missing from the bundle" \
   test -s "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 expect "CFBundleIconFile" "$(plutil -extract CFBundleIconFile raw "$INFO_PLIST")" "AppIcon"
-expect "CFBundleDisplayName" "$(plutil -extract CFBundleDisplayName raw "$INFO_PLIST")" "Codex Usage"
+expect "CFBundleDisplayName" "$(plutil -extract CFBundleDisplayName raw "$INFO_PLIST")" "Codex Usage Menubar"
 require "the code signature is invalid" \
   codesign --verify --strict "$APP_BUNDLE"
 
