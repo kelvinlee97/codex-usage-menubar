@@ -70,7 +70,6 @@ script/
   build_and_run.sh               build, bundle, install, launch/debug/logs
   qa.sh                          full local release QA gate
   package_release.sh             Mandatory Developer ID signing + notarization
-design-qa.md                     visual QA record (Finder/Quick Look icon checks)
 docs/screenshots/                README screenshots
 README.md / LICENSE / PRIVACY.md
 ```
