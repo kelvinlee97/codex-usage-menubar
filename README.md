@@ -113,13 +113,10 @@ Codex Usage locates the Codex CLI on your machine, launches `codex app-server --
 ## Known limitations
 
 - macOS only — no Windows or Linux support.
-- The menu-bar glyph uses a built-in monochrome SF Symbol.
 - Not sandboxed; App Store distribution is unproven for this architecture.
-- No automatic updater or DMG installer.
-- Usage data comes from the Codex CLI's local app-server protocol, which is not a stable public API and can change between Codex releases.
 - Builds from source are ad-hoc signed; only the published release is Developer ID signed and notarized.
 - No automatic updater, DMG installer, or crash reporting.
-- Usage retrieval depends on the local Codex CLI's app-server protocol, which is not a stable public API.
+- Usage data comes from the Codex CLI's local app-server protocol, which is not a stable public API and can change between Codex releases.
 
 ## License
 
