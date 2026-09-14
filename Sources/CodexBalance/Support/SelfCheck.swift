@@ -22,13 +22,22 @@ enum SelfCheck {
             precondition(snapshot.secondary?.remainingPercent == 67)
             precondition(snapshot.creditBalance == "157.28")
             precondition(snapshot.formattedCreditBalance == "157.28")
+            precondition(snapshot.primary?.hasReset(asOf: Date(timeIntervalSince1970: 1_789_369_181)) == true)
+            precondition(snapshot.primary?.hasReset(asOf: Date(timeIntervalSince1970: 1_789_369_179)) == false)
             try checkParserVariants()
+            try checkRemainingPercentEndpoints()
+            try checkPollSchedule()
             precondition(
                 CodexExecutableResolver.candidates(environment: ["PATH": "/custom/bin"])
                     .contains(URL(fileURLWithPath: "/custom/bin/codex"))
             )
-            precondition(CodexExecutableResolver.resolve() != nil)
+            // Resolving a real Codex CLI is an assertion about the machine, not about this code,
+            // so it stays opt-in: a fresh clone and CI have no Codex installed.
+            if ProcessInfo.processInfo.environment["CODEX_BALANCE_SELF_CHECK_REQUIRE_CLI"] == "1" {
+                precondition(CodexExecutableResolver.resolve() != nil)
+            }
             try checkPipeTimeoutAndShortRead()
+            try checkBrokenPipeIsRecoverable()
             print("CodexBalance self-check passed")
             exit(EXIT_SUCCESS)
         } catch {
@@ -48,7 +57,7 @@ enum SelfCheck {
         }
         """#.utf8)
         let snapshot = try CodexUsageClient.decodeSnapshot(from: byIDOnly)
-        precondition(snapshot.primary?.usedPercent == 13)
+        precondition(snapshot.primary?.usedPercent == 12.6)
         precondition(snapshot.primary?.remainingPercent == 87)
         precondition(snapshot.creditBalance == "42.5")
 
@@ -58,6 +67,42 @@ enum SelfCheck {
         } catch CodexUsageClient.ClientError.malformedResponse {
             // Expected.
         }
+    }
+
+    /// A rounded percentage must not claim an exhausted or untouched window that isn't one.
+    private static func checkRemainingPercentEndpoints() throws {
+        func remaining(_ used: Double) -> Int {
+            UsageWindow(usedPercent: used, windowDurationMinutes: 300, resetsAt: nil).remainingPercent
+        }
+        precondition(remaining(0) == 100)
+        precondition(remaining(0.4) == 99)
+        precondition(remaining(99.6) == 1)
+        precondition(remaining(100) == 0)
+        precondition(remaining(120) == 0)
+        precondition(remaining(-5) == 100)
+    }
+
+    private static func checkPollSchedule() throws {
+        precondition(PollSchedule.interval(consecutiveFailures: 0) == PollSchedule.successInterval)
+        precondition(PollSchedule.interval(consecutiveFailures: 1) == 30)
+        precondition(PollSchedule.interval(consecutiveFailures: 2) == 60)
+        precondition(PollSchedule.interval(consecutiveFailures: 3) == 120)
+        precondition(PollSchedule.interval(consecutiveFailures: 20) == PollSchedule.maxFailureDelay)
+    }
+
+    /// Writing to a dead subprocess must raise a catchable error, not SIGPIPE. Without the
+    /// `signal(SIGPIPE, SIG_IGN)` in `CodexBalanceApp.init`, this check kills the process instead
+    /// of failing, which is exactly the production symptom it guards against.
+    private static func checkBrokenPipeIsRecoverable() throws {
+        let pipe = Pipe()
+        try pipe.fileHandleForReading.close()
+        do {
+            try pipe.fileHandleForWriting.write(contentsOf: Data("dead\n".utf8))
+            preconditionFailure("Writing to a closed pipe should fail")
+        } catch {
+            // Expected: EPIPE surfaces as a thrown error once SIGPIPE is ignored.
+        }
+        try? pipe.fileHandleForWriting.close()
     }
 
     private static func checkPipeTimeoutAndShortRead() throws {
