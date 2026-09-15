@@ -53,25 +53,32 @@ Steps 1–4 need an Apple account in a browser and must be done by hand.
       swift-testing target. Gets the test harness out of the shipped binary and
       replaces `Precondition failed: line 51` with named failures. Deliberately
       deferred until after v1.0.0 — it touches the code path being shipped.
-- [ ] Add a CI workflow that builds and runs the self-check on push. The two
-      merged workflows are Claude-triggered only; nothing verifies a build today.
-      (The self-check is now hermetic, so a runner without Codex installed works.)
-- [ ] Read `LoginItemManager.requiresApproval` into `@State` in `onAppear`
-      instead of calling it during `body` — it is not observable, so the
-      "Open Login Items Settings" button lingers after the user approves.
+- [x] Add a CI workflow that builds and runs the self-check on push.
+      `.github/workflows/build.yml`, verified green against a real PR.
+- [x] Read `LoginItemManager.requiresApproval` into `@State`, refreshed in
+      `onAppear` and after the toggle's `setEnabled` call — the settings
+      button no longer lingers after approval.
 - [ ] Intel verification. The binary is universal and the x86_64 slice builds and
-      links, but it has never been *run* on an Intel Mac.
-- [ ] Test on a machine with no Codex CLI installed — confirm the popover's error
-      state is understandable rather than a blank or cryptic panel.
-- [ ] Refresh when a usage window resets. After `resetsAt` passes the popover
-      shows "Resetting…" for up to `PollSchedule.successInterval` (120s), which is
-      exactly when people look at it.
+      links, but it has never been *run* on an Intel Mac. Needs physical Intel
+      hardware; not something a dev-machine session can do.
+- [x] Test on a machine with no Codex CLI installed — could not fully simulate
+      (the resolver's hardcoded fallback paths found the real install on this
+      machine regardless of `PATH`/`CODEX_CLI_PATH`), but confirmed by code
+      inspection that `ClientError.codexNotFound`'s message is specific and
+      actionable, not blank or cryptic, and added a self-check regression guard
+      on the exact string.
+- [x] Refresh when a usage window resets. `PollSchedule.interval(consecutiveFailures:snapshot:now:)`
+      shortens the next poll to 5s once a window's `resetsAt` has passed (only on
+      a successful poll; failure backoff is unaffected), instead of waiting the
+      full 120s `successInterval`.
 - [ ] Decide on an update story. There is no Sparkle/auto-updater, so v1.0.1
-      means users re-downloading by hand with no prompt.
-- [ ] Add a "Troubleshooting" section to the README (CLI not found, not logged in,
-      app-server protocol changed under a new Codex CLI release).
+      means users re-downloading by hand with no prompt. A real decision, not a
+      bug fix — left for you.
+- [x] Add a "Troubleshooting" section to the README (CLI not found, service
+      hung/stopped, protocol drift, nothing in the menu bar).
 - [ ] Consider a DMG instead of a zip for a conventional drag-to-Applications
-      install.
+      install. A packaging preference, and testing it end-to-end needs
+      notarization credentials anyway — left for the release-day pass.
 - [ ] Re-run `./script/qa.sh` against a freshly updated Codex CLI before each
       release — the app-server JSON protocol is reverse-engineered and is the
       main breakage risk.

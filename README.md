@@ -110,6 +110,22 @@ Public release packaging requires both variables and fails immediately if either
 
 Codex Usage Menubar locates the Codex CLI on your machine, launches `codex app-server --stdio`, and talks to it over stdin/stdout to read your account's rate-limit and credit-balance data. This is not a public/stable API — it's the same interface the Codex CLI itself uses locally, so it may change between Codex CLI releases.
 
+## Troubleshooting
+
+The popover shows an error banner with a Retry button whenever a refresh fails; the message text tells you which of these it is.
+
+**"Codex CLI was not found. Install Codex or set CODEX_CLI_PATH."**
+The app couldn't find a `codex` executable. It checks, in order: the `CODEX_CLI_PATH` environment variable, the bundled ChatGPT.app resource path, every directory on your `PATH`, then common install locations (`/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`, `~/.volta/bin`, `~/.asdf/shims`, `~/.npm-global/bin`). [Install the Codex CLI](https://github.com/openai/codex) if you haven't, or set `CODEX_CLI_PATH` to its full path if it lives somewhere else.
+
+**"Codex usage service did not respond within 10 seconds." / "Codex usage service stopped unexpectedly."**
+The `codex app-server` subprocess hung or exited. Confirm you're signed in to the Codex CLI (`codex login` or equivalent) and that `codex app-server --stdio` runs without hanging when you invoke it directly from a terminal.
+
+**A server-reported error message, or "Codex returned an unreadable usage response."**
+The app-server's JSON protocol is reverse-engineered against the currently installed Codex CLI, not a stable public API — see [How it works](#how-it-works). A Codex CLI update can change field names or response shape out from under this app. If this starts happening after updating the Codex CLI, please [open an issue](../../issues) with the error text.
+
+**Nothing shows in the menu bar at all**
+Check Console.app or run `./script/build_and_run.sh --telemetry` to stream this app's own logs (subsystem `com.kelvin.codexbalance`) and see what it's doing on launch.
+
 ## Known limitations
 
 - macOS only — no Windows or Linux support.

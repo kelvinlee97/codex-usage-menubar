@@ -31,6 +31,12 @@ enum SelfCheck {
                 CodexExecutableResolver.candidates(environment: ["PATH": "/custom/bin"])
                     .contains(URL(fileURLWithPath: "/custom/bin/codex"))
             )
+            // Guards the popover's no-CLI error state: it must stay a specific, actionable
+            // sentence, not degrade into something blank or cryptic (e.g. a bare error code).
+            precondition(
+                CodexUsageClient.ClientError.codexNotFound.errorDescription
+                    == "Codex CLI was not found. Install Codex or set CODEX_CLI_PATH."
+            )
             // Resolving a real Codex CLI is an assertion about the machine, not about this code,
             // so it stays opt-in: a fresh clone and CI have no Codex installed.
             if ProcessInfo.processInfo.environment["CODEX_BALANCE_SELF_CHECK_REQUIRE_CLI"] == "1" {
@@ -88,6 +94,28 @@ enum SelfCheck {
         precondition(PollSchedule.interval(consecutiveFailures: 2) == 60)
         precondition(PollSchedule.interval(consecutiveFailures: 3) == 120)
         precondition(PollSchedule.interval(consecutiveFailures: 20) == PollSchedule.maxFailureDelay)
+
+        // Reset-awareness only kicks in on a successful poll (consecutiveFailures == 0) and only
+        // ever shortens the interval, never lengthens it.
+        let now = Date()
+        let window = UsageWindow(usedPercent: 50, windowDurationMinutes: 300, resetsAt: now.addingTimeInterval(40))
+        let snapshot = UsageSnapshot(primary: window, secondary: nil, creditBalance: nil, updatedAt: now)
+        precondition(PollSchedule.interval(consecutiveFailures: 0, snapshot: snapshot, now: now) == 40)
+
+        let alreadyReset = UsageWindow(usedPercent: 50, windowDurationMinutes: 300, resetsAt: now.addingTimeInterval(-5))
+        let resetSnapshot = UsageSnapshot(primary: alreadyReset, secondary: nil, creditBalance: nil, updatedAt: now)
+        precondition(PollSchedule.interval(consecutiveFailures: 0, snapshot: resetSnapshot, now: now) == PollSchedule.resetPollDelay)
+
+        // A failing poll keeps its own backoff regardless of how stale the last-known snapshot's
+        // reset time is.
+        precondition(PollSchedule.interval(consecutiveFailures: 1, snapshot: resetSnapshot, now: now) == 30)
+
+        // A reset far in the future never lengthens the normal interval.
+        let distant = UsageWindow(usedPercent: 50, windowDurationMinutes: 300, resetsAt: now.addingTimeInterval(10_000))
+        let distantSnapshot = UsageSnapshot(primary: distant, secondary: nil, creditBalance: nil, updatedAt: now)
+        precondition(PollSchedule.interval(consecutiveFailures: 0, snapshot: distantSnapshot, now: now) == PollSchedule.successInterval)
+
+        precondition(PollSchedule.interval(consecutiveFailures: 0, snapshot: nil, now: now) == PollSchedule.successInterval)
     }
 
     /// Writing to a dead subprocess must raise a catchable error, not SIGPIPE. Without the
