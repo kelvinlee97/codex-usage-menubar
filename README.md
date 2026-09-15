@@ -121,3 +121,4 @@ Codex Usage Menubar locates the Codex CLI on your machine, launches `codex app-s
 ## License
 
 [MIT](LICENSE)
+<!-- claude-review CI verification: 2026-09-15T08:00:20Z -->
