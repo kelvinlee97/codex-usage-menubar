@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and self-check
+    # macOS 15 images ship Xcode 16, which provides the Swift 6 toolchain that
+    # Package.swift (swift-tools-version: 6.0) requires.
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Cache SwiftPM build products
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('Package.swift', 'Package.resolved') }}-${{ hashFiles('Sources/**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-${{ hashFiles('Package.swift', 'Package.resolved') }}-
+            ${{ runner.os }}-spm-
+
+      - name: Build
+        run: swift build
+
+      # The project has no XCTest target; SelfCheck.swift is the only test
+      # harness. It is hermetic (no Codex CLI required) and asserts with
+      # precondition, so a non-zero exit here means a real regression.
+      - name: Self-check
+        run: CODEX_BALANCE_SELF_CHECK=1 swift run CodexBalance
+
+      - name: Build release
+        run: swift build -c release
