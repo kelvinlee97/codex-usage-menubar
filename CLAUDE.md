@@ -15,6 +15,7 @@ Build, install to `/Applications`, and launch:
 ./script/build_and_run.sh
 ```
 Modes: `--verify` (launch and confirm the process exists), `--logs` (stream all app logs), `--telemetry` (stream only `subsystem == "com.kelvin.codexbalance"` logs), `--debug` (launch under `lldb`). Debug build by default; set `CODEX_BALANCE_CONFIGURATION=release` to build release.
+Other overrides honoured by `build_and_run.sh` and `qa.sh`: `CODEX_BALANCE_INSTALL_DIR` (default `/Applications`) and `CODEX_BALANCE_SWIFTPM_DISABLE_SANDBOX=1` (adds `--disable-sandbox` to `swift build`).
 
 Run the full local QA gate (release build, in-process self-check, bundle/icon/signature checks, launch, and a live Codex usage refresh observed via Unified Logging):
 ```bash
@@ -55,6 +56,7 @@ The menu-bar label is the text wordmark `Codex` followed by the remaining percen
 
 ```
 Package.swift
+TODO.md                          v1.0.0 release tracker — read first for current blockers
 Assets/                          AppIcon source art + packaged .icns
 Sources/CodexBalance/
   App/CodexBalanceApp.swift      MenuBarExtra scene and menu-bar label
@@ -71,6 +73,7 @@ script/
   qa.sh                          full local release QA gate
   package_release.sh             Mandatory Developer ID signing + notarization
 docs/screenshots/                README screenshots
+dist/                            build output; also holds stale pre-rename bundles
 README.md / LICENSE / PRIVACY.md
 ```
 
@@ -78,5 +81,6 @@ README.md / LICENSE / PRIVACY.md
 
 - Public release packaging requires Developer ID signing and notarization credentials.
 - Release builds are universal (arm64 + x86_64). SwiftPM's multi-arch build needs full Xcode, so `build_and_run.sh` builds each slice separately and joins them with `lipo` when `CODEX_BALANCE_UNIVERSAL=1` (set by `qa.sh` and `package_release.sh`); plain dev builds stay single-arch for speed.
+- `dist/` still contains bundles from the pre-1.0 renames (`Codex Balance.app`, `Codex Usage.app`) alongside the current `Codex Usage Menubar.app` — only the last is current.
 - Sandboxing (Mac App Store) is unproven for this subprocess-launching architecture — do not add sandbox entitlements without first validating that a sandboxed build can discover/launch/talk to the user's Codex CLI.
 - The product includes an explicit unofficial/non-affiliation disclosure.
