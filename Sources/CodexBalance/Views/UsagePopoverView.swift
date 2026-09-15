@@ -5,6 +5,7 @@ import SwiftUI
 struct UsagePopoverView: View {
     @ObservedObject var store: UsageStore
     @State private var launchAtLogin = LoginItemManager.isEnabled
+    @State private var requiresLoginApproval = LoginItemManager.requiresApproval
     @State private var loginItemError: String?
 
     var body: some View {
@@ -82,9 +83,10 @@ struct UsagePopoverView: View {
                         launchAtLogin = LoginItemManager.isEnabled
                         loginItemError = error.localizedDescription
                     }
+                    requiresLoginApproval = LoginItemManager.requiresApproval
                 }
 
-            if LoginItemManager.requiresApproval {
+            if requiresLoginApproval {
                 Button("Open Login Items Settings") {
                     SMAppService.openSystemSettingsLoginItems()
                 }
@@ -118,6 +120,7 @@ struct UsagePopoverView: View {
         .frame(width: 320)
         .onAppear {
             launchAtLogin = LoginItemManager.isEnabled
+            requiresLoginApproval = LoginItemManager.requiresApproval
             Task { await store.refreshIfStale() }
         }
     }

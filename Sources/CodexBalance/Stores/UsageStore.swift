@@ -86,7 +86,7 @@ final class UsageStore: ObservableObject {
             while !Task.isCancelled {
                 guard let self else { return }
                 await self.refresh()
-                let delay = PollSchedule.interval(consecutiveFailures: self.consecutiveFailures)
+                let delay = PollSchedule.interval(consecutiveFailures: self.consecutiveFailures, snapshot: self.snapshot)
                 do {
                     try await Task.sleep(for: .seconds(delay))
                 } catch {
